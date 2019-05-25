@@ -1,0 +1,30 @@
+---
+title: "Ejercicio 1 R"
+author: "Claudio Sarate"
+date: "25/5/2019"
+output: html_document
+---
+
+> Integrandes:
+
+* Ramiro Caro
+* Martín Hunziker
+* Claudio Sarate
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Ejercicio: Mida el tiempo en una version vectorizada.
+
+
+```{r}
+m=10; n=10;
+mymat<-replicate(m, rnorm(n)) # create matrix of normal random numbers
+mydframe=data.frame(mymat) # transform into data frame
+# measure time execution
+system.time(
+  mydFrame<-sum(mydframe, (10*sin(0.75*pi))))
+```
+
