@@ -1,0 +1,157 @@
+---
+title: "Practico 2"
+author: "Claudio Sarate"
+date: "24/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+> Integrandes:
+
+* Ramiro Caro
+* Martín Hunziker
+* Claudio Sarate
+
+## Practico 2: Entregar un Rmd donde se:
+
+- Elija un dataset clasificado de su preferencia y area (domain expertise), aplique un metodo de clustering y/o mixtura de Gaussianas en el mismo.
+
+- Investigue los resultados en el meta parametro $K$ numero de cumulos e investigue posibles procesos de seleccion del mismo.
+
+- Elabore un resumen, y selecione un mejor valor segun el/los criterios aplicados, discuta el significado de los cumulos encontrados. 
+
+- Comente la influencia de la normalizacion de los datos en los resultados del clustering.
+
+Desarrollo:
+
+##Elija un dataset clasificado de su preferencia y area (domain expertise), aplique un metodo de clustering y/o mixtura de Gaussianas en el mismo.
+
+###Preparamos el set de datos
+
+Para este práctico utilizaremos un dataset sobre polizas de clientes de una aseguradora con datos como:
+
+* el número de poliza
+* el sexo de la persona
+* la circulacion (Urbana o No Urbana)
+* si existe una Garantía sobre daños propios
+* la cantidad de Siniestros para la poliza contratada
+* la antigüedad del permiso de conducir
+* edad
+* antigüedad del vehiculo
+
+Preguntas que querríamos contestar:
+
+* Que tarifas debería aplicar
+
+* A que grupo es mas interesante para aplicar una campaña de marketing
+
+
+```{r}
+aseguradora <- paste(getwd(),"/insurance.csv", sep = "")
+
+insurance <- read.csv(aseguradora, encoding="UTF-8", header=TRUE, sep=",", na.strings="NA", dec=".", strip.white=TRUE)
+
+colnames(insurance)
+```
+```{r}
+str(insurance)
+insurance
+```
+
+##Escalamos los datos
+
+El primer paso sería normalizar los datos para que ninguna variable tenga mas peso que otra, ya que por ejemplo la variable edad tiene magnitudes muy distintas a los valores de siniestro por ejemplo.
+
+```{r}
+insurance.scale <- as.data.frame(scale(insurance[,5:9])) # escalar los datos
+insurance.scale
+```
+
+##Creamos los clusters
+
+Se fija la semilla para que el componente aleatorio de kmeans sea el mismo cada vez que lo usamos
+
+```{r}
+set.seed(80) # fijar semilla
+
+insurance.km <- kmeans(insurance.scale, centers = 4) # Realizamos clustering
+insurance.km # contenido del objeto
+```
+
+##Evaluamos la inercia entre grupos
+
+Esta inercia debería ser la mayor posible para asegurarnos la heterogeneidad de los grupos 
+
+```{r}
+insurance.km$betweenss # inercia ínter grupos
+```
+##Evaluamos la inercia dentro de los grupos
+
+Nos indica las inercias individuales dentro de cada grupo 
+
+```{r}
+insurance.km$withinss # inercia intra grupos
+```
+
+##Evaluamos la inercia total dentro de los grupos
+
+Sería la suma de las inercias de cada grupo, en este caso 4. Nos interesa que sea lo menor posible.
+
+```{r}
+insurance.km$tot.withinss # inercia intra grupos (total)
+```
+
+##Evaluamos la inercia de los cluaters
+
+Para ello utilizamos la inercia total que es la inercia de todos los grupos con respecto al centroide de todas las observaciones, es decir la suma de las inercias entre grupos mas la inercia dentro de los grupos
+
+
+```{r}
+insurance.km$totss # inercia total
+```
+
+##Determinar un número de clusters óptimo
+
+En este caso elegimos 4 clusters pero no sabemos en realidad cual sería el número óptimo ya que depende de lo que estemos buscando. 
+
+Para tratar de acecarnos a un número óptimo nos basaremos en una exploración de los distintos valores que puede tomar la inercia inter grupos probando con distintas cantidades de clusters.
+
+Generamos un vector que guarda los valores de inercia inter grupos con numeros de clusters  que van de 1 a 20.
+
+```{r}
+sumbt<-kmeans(insurance.scale, centers = 1)$betweenss
+
+for(i in 2:10) sumbt[i] <- kmeans(insurance.scale, centers = i)$betweenss
+```
+
+##Graficamos los resultados
+
+```{r}
+plot(1:10, sumbt, type = "b", xlab = "número de clusters", ylab = "suma de cuadrados ínter grupos")
+```
+Al parecer de acuerdo al grafico el numero optimo de clusters estaría en 4
+
+
+##Inspeccionando los resultados
+
+Representamos gráficamente dos de las variables que pueden interesarnos como son, la antigüedad en la compañia y la antigüedad en el permiso de conducir, pintando las observaciones de acuerdo al cluster a la que han sido asignadas.
+
+```{r}
+plot(insurance$ant_comp,insurance$ant_perm, col=insurance.km$cluster ,xlab = "Fidelidad a la compañía", ylab = "Experiencia" )
+```
+En este gráfico podemos ver en verde personas que le son fieles a la compañía y que son conductores experimentados
+
+También podemo tomar las variables iniciales y agruparlas en función del cluster al que han sido asignadas y generamos la media de esos valores.
+
+
+```{r}
+aggregate(insurance[,5:9] ,by = list(insurance.km$cluster), mean)
+```
+
+Podemos ver que por ejemplo el cluster Nº 2 es donde se presenta el indice de siniestralidad mas alto, que se corresponde a una media de edad de 49 años, con una antigüedad del vehiculo en 3,2 años.
+
+Es decir que los vehiculos mas nuevos con las personas de mas edad de la muestra de datos como media presentarína el mayor indice de siniestralidad.
