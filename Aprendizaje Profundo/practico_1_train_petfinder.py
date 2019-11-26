@@ -27,6 +27,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from tensorflow.keras import layers, models
 from tensorflow.keras.utils import plot_model
+from tensorflow.python.client import device_lib
 
 BASE_DIR = "./Data/"
 
@@ -116,6 +117,10 @@ def load_dataset(dataset_dir, batch_size):
     
     return dataset, dev_dataset, test_dataset
 
+def get_available_gpus():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
+
 def define_model(embedded_input, direct_input, hidden_layers, dropouts, nlabels, init_seed):
     tf.keras.backend.clear_session()
     initializer = tf.keras.initializers.glorot_uniform(seed=init_seed)
@@ -164,7 +169,7 @@ def define_model(embedded_input, direct_input, hidden_layers, dropouts, nlabels,
     return model
 
 def main():
-#    get_available_gpus()
+    get_available_gpus()
 
     args = read_args()
     dataset, dev_dataset, test_dataset = load_dataset(args.dataset_dir, args.batch_size)
