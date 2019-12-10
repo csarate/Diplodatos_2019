@@ -1,0 +1,15 @@
+artifact_uri: file:///home/claudio/Documentos/Ingenieria%20de%20Software/Data%20Science/Machine%20Learning/Diplomatura%20de%20Datos/Aprendizaje%20Profundo/mlruns/1/d5cde6af11524800a03650319d5dd643/artifacts
+end_time: 1575995157755
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+name: ''
+run_id: d5cde6af11524800a03650319d5dd643
+run_uuid: d5cde6af11524800a03650319d5dd643
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1575995139139
+status: 3
+tags: []
+user_id: claudio

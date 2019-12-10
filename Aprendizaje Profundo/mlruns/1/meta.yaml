@@ -1,0 +1,4 @@
+artifact_location: file:///home/claudio/Documentos/Ingenieria%20de%20Software/Data%20Science/Machine%20Learning/Diplomatura%20de%20Datos/Aprendizaje%20Profundo/mlruns/1
+experiment_id: '1'
+lifecycle_stage: active
+name: Base Model
